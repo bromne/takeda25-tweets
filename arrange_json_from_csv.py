@@ -66,34 +66,28 @@ def date_from_item(item):
     return datetime.strptime(item["timestamp"], '%Y-%m-%d %H:%M:%S %z')\
         .strftime('%Y-%m-%d')
 
-def main():
-    """
-    メイン
-    """
-    items = [item_from_line(line) for line in get_lines()]
+items = [item_from_line(line) for line in get_lines()]
 
-    # ツイートを、日付ごとにグループ化します
-    groups = itertools.groupby(items, date_from_item)
+# ツイートを、日付ごとにグループ化します
+groups = itertools.groupby(items, date_from_item)
 
-    # 出力用フォルダを用意します
-    delete_folder("out")
-    os.makedirs('out', exist_ok=True)
+# 出力用フォルダを用意します
+delete_folder("out")
+os.makedirs('out', exist_ok=True)
 
-    # ファイル数カウント（もっとマシな方法ないのか？）
-    files = 0
+# ファイル数カウント（もっとマシな方法ないのか？）
+files = 0
 
-    # グループごとに JSON としてフォルダに出力します
-    for group in groups:
-        files = files + 1
-        date, tweets = group
-        data = {
-            "date": date,
-            "items": list(tweets),
-        }
-        with open("out/{0}.json".format(date), 'w') as file:
-            json.dump(data, file)
-            print("created: out/{0}.json".format(date))
+# グループごとに JSON としてフォルダに出力します
+for group in groups:
+    files = files + 1
+    date, tweets = group
+    data = {
+        "date": date,
+        "items": list(tweets),
+    }
+    with open("out/{0}.json".format(date), 'w') as file:
+        json.dump(data, file)
+        print("created: out/{0}.json".format(date))
 
-    print("{0} files created.".format(files))
-
-main()
+print("{0} files created.".format(files))
