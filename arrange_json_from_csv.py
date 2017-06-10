@@ -55,8 +55,8 @@ def item_from_line(line):
     CSV 行をツイートのデータを表現する辞書に変換します
     """
     item = {}
-    for i in range(len(line)):
-        item[COLUMNS[i]] = line[i]
+    for i, column_name in enumerate(COLUMNS):
+        item[column_name] = line[i]
     return item
 
 def date_from_item(item):
@@ -69,18 +69,14 @@ def date_from_item(item):
 items = [item_from_line(line) for line in get_lines()]
 
 # ツイートを、日付ごとにグループ化します
-groups = itertools.groupby(items, date_from_item)
+groups = list(itertools.groupby(items, date_from_item))
 
 # 出力用フォルダを用意します
 delete_folder("out")
 os.makedirs('out', exist_ok=True)
 
-# ファイル数カウント（もっとマシな方法ないのか？）
-files = 0
-
 # グループごとに JSON としてフォルダに出力します
 for group in groups:
-    files = files + 1
     date, tweets = group
     data = {
         "date": date,
@@ -90,4 +86,4 @@ for group in groups:
         json.dump(data, file)
         print("created: out/{0}.json".format(date))
 
-print("{0} files created.".format(files))
+print("{0} files created.".format(len(groups)))
