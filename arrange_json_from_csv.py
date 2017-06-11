@@ -40,16 +40,6 @@ def delete_folder(path):
         pth.rmdir()
     delete_folder_inner(pathlib.Path(path))
 
-def get_lines():
-    """
-    CSV の行を取得します
-    """
-    with open('tweets.csv') as file:
-        reader = csv.reader(file)
-        _ = next(reader)
-
-        return list(reader)
-
 def item_from_line(line):
     """
     CSV 行をツイートのデータを表現する辞書に変換します
@@ -66,24 +56,31 @@ def date_from_item(item):
     return datetime.strptime(item["timestamp"], '%Y-%m-%d %H:%M:%S %z')\
         .strftime('%Y-%m-%d')
 
-items = [item_from_line(line) for line in get_lines()]
+with open('tweets.csv') as file:
+    destination = "out"
 
-# ツイートを、日付ごとにグループ化します
-groups = list(itertools.groupby(items, date_from_item))
+    lines = csv.reader(file)
+    _ = next(lines) # 最初の行（ラベル）を除外する
 
-# 出力用フォルダを用意します
-delete_folder("out")
-os.makedirs('out', exist_ok=True)
+    # ツイートを、日付ごとにグループ化します
+    items = map(item_from_line, lines)
+    groups = itertools.groupby(items, date_from_item)
 
-# グループごとに JSON としてフォルダに出力します
-for group in groups:
-    date, tweets = group
-    data = {
-        "date": date,
-        "items": list(tweets),
-    }
-    with open("out/{0}.json".format(date), 'w') as file:
-        json.dump(data, file)
-        print("created: out/{0}.json".format(date))
+    # 出力用フォルダを用意します
+    delete_folder(destination)
+    os.makedirs(destination, exist_ok=True)
 
-print("{0} files created.".format(len(groups)))
+    # グループごとに JSON としてフォルダに出力します
+    for group in groups:
+        date, tweets = group
+        data = {
+            "date": date,
+            "items": list(tweets),
+        }
+        with open("{0}/{1}.json".format(destination, date), 'w') as file:
+            json.dump(data, file)
+            print("created: {0}/{1}.json".format(destination, date))
+
+    # 出力したファイルの個数を表示します
+    files = len(list(pathlib.Path(destination).iterdir()))
+    print("{0} files created.".format(files))
