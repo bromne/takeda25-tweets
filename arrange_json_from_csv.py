@@ -78,7 +78,7 @@ with open('tweets.csv') as file:
             "items": list(tweets),
         }
         with open("{0}/{1}.json".format(destination, date), 'w') as file:
-            json.dump(data, file)
+            json.dump(data, file, indent=4, sort_keys=True)
             print("created: {0}/{1}.json".format(destination, date))
 
     # 出力したファイルの個数を表示します
